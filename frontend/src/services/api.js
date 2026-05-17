@@ -1,20 +1,20 @@
 import axios from 'axios';
 
-const BASE_URL = import.meta.env.VITE_API_URL || '/api';
-
+// Always use a relative base URL so every request goes through
+// Vite's dev-server proxy → no CORS headers required.
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: '/api',
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Attach token to every request
+// Attach JWT token to every request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// Normalize error messages
+// Normalise error messages
 api.interceptors.response.use(
   (res) => res,
   (err) => {

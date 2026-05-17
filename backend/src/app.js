@@ -6,16 +6,18 @@ const { errorHandler } = require('./middleware/errorMiddleware');
 
 const app = express();
 
-// CORS
+// CORS — allowed origins come from the env so no code change is needed
+// when switching between local dev and production deployment.
 const allowedOrigins = [
-  'https://task-management-theta-six-12.vercel.app',
-  'http://localhost:5173',
-];
+  process.env.CLIENT_URL,          // set in .env  (localhost or Vercel)
+  'http://localhost:5173',          // always allow local Vite dev server
+  'http://localhost:4173',          // allow Vite preview build too
+].filter(Boolean);                  // drop undefined if CLIENT_URL is not set
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (e.g. mobile apps, curl, Postman)
+      // Allow requests with no origin (Postman, curl, server-to-server)
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) return callback(null, true);
       callback(new Error(`CORS: origin '${origin}' not allowed`));
