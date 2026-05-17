@@ -9,7 +9,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "https://task-management-theta-six-12.vercel.app/",
+    origin: "https://task-management-theta-six-12.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE"]
   }
 });
@@ -52,3 +52,14 @@ startServer().catch((error) => {
   console.error(`Startup error: ${error.message}`);
   process.exit(1);
 });
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://task-management-theta-six-12.vercel.app"
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
+  credentials: true
+}));
