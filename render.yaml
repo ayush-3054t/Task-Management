@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: task-management-api
+    runtime: node
+    rootDir: backend          # Render runs everything from the backend folder
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000           # Render assigns this automatically; keep in sync
+      - key: MONGO_URI
+        sync: false            # Set this in the Render dashboard (secret)
+      - key: JWT_SECRET
+        sync: false            # Set this in the Render dashboard (secret)
+      - key: CLIENT_URL
+        value: https://task-management-theta-six-12.vercel.app

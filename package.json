@@ -1,0 +1,13 @@
+{
+  "name": "task-management-root",
+  "version": "1.0.0",
+  "description": "Root package — delegates to backend for Render deployment",
+  "scripts": {
+    "start": "node backend/src/server.js",
+    "install-backend": "npm install --prefix backend",
+    "build": "npm install --prefix backend"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

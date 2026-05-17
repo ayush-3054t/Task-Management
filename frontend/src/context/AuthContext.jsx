@@ -11,10 +11,11 @@ export function AuthProvider({ children }) {
   const [socket, setSocket] = useState(null);
 
   // Initialize socket when user logs in.
-  // Connect to '/' (same origin) so the request goes through Vite's proxy
-  // → no CORS issue in local dev, and works unchanged in production too.
+  // Local dev: VITE_SOCKET_URL unset → connects to '/' → Vite proxy handles it (no CORS).
+  // Production: VITE_SOCKET_URL set to Render URL → direct connection.
   const initSocket = useCallback((userId) => {
-    const s = io('/', { withCredentials: true });
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || '/';
+    const s = io(socketUrl, { withCredentials: true });
     s.on('connect', () => s.emit('join', userId));
     setSocket(s);
     return s;

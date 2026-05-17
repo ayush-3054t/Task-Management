@@ -1,9 +1,11 @@
 import axios from 'axios';
 
-// Always use a relative base URL so every request goes through
-// Vite's dev-server proxy → no CORS headers required.
+// In local dev: VITE_API_URL is unset → falls back to '/api' → Vite proxy handles it (no CORS).
+// In production (Vercel): VITE_API_URL is set to the Render backend URL.
+const BASE_URL = import.meta.env.VITE_API_URL || '/api';
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' },
 });
 
