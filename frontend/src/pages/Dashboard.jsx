@@ -51,7 +51,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (!user?._id) return undefined;
 
-    const socket = io(import.meta.env.VITE_SOCKET_URL || "https://task-management-sxit.onrender.com");
+    const socket = io(import.meta.env.VITE_SOCKET_URL || "https://task-management-0oav.onrender.com");
     socket.emit("join-user-room", user._id);
 
     socket.on("task-created", (task) => {
