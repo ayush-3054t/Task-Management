@@ -11,6 +11,7 @@ const app = express();
 const allowedOrigins = [
   process.env.CLIENT_URL,          // set in .env  (localhost or Vercel)
   'http://localhost:5173',          // always allow local Vite dev server
+  'http://localhost:5174',          // allow Vite fallback dev port
   'http://localhost:4173',          // allow Vite preview build too
 ].filter(Boolean);                  // drop undefined if CLIENT_URL is not set
 

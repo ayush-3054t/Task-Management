@@ -45,6 +45,12 @@ A full-stack task management application built with MongoDB, Express, React, and
 
 ## Getting Started
 
+### Root
+```bash
+npm install
+npm run dev        # starts backend on 5000 and frontend on 5173 together
+```
+
 ### Backend
 ```bash
 cd backend
