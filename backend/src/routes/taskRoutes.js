@@ -1,15 +1,35 @@
-import express from "express";
-import {
-  createTask,
-  deleteTask,
+const express = require('express');
+const { body } = require('express-validator');
+const {
   getTasks,
-  updateTask
-} from "../controllers/taskController.js";
-import { protect } from "../middleware/authMiddleware.js";
+  getTask,
+  createTask,
+  updateTask,
+  deleteTask,
+  updateTaskStatus,
+} = require('../controllers/taskController');
+const { protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-router.route("/").get(protect, getTasks).post(protect, createTask);
-router.route("/:id").put(protect, updateTask).delete(protect, deleteTask);
+router.use(protect);
 
-export default router;
+router.route('/').get(getTasks).post(
+  [
+    body('title').trim().notEmpty().withMessage('Title is required'),
+    body('status')
+      .optional()
+      .isIn(['todo', 'in-progress', 'completed'])
+      .withMessage('Invalid status'),
+    body('priority')
+      .optional()
+      .isIn(['low', 'medium', 'high'])
+      .withMessage('Invalid priority'),
+  ],
+  createTask
+);
+
+router.route('/:id').get(getTask).put(updateTask).delete(deleteTask);
+router.patch('/:id/status', updateTaskStatus);
+
+module.exports = router;

@@ -1,103 +1,120 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import { CheckSquare } from "lucide-react";
-import { useAuth } from "../context/AuthContext.jsx";
-import { getErrorMessage } from "../services/api.js";
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { FiCheckSquare, FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight } from 'react-icons/fi';
+import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
+import Loader from '../components/Loader';
+import AuthIllustration from '../components/illustrations/AuthIllustration';
 
-const Login = () => {
-  const navigate = useNavigate();
+const fadeUp = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: .45, ease: 'easeOut' } } };
+const stagger = { hidden: {}, show: { transition: { staggerChildren: .1 } } };
+
+export default function Login() {
   const { login } = useAuth();
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setForm((current) => ({ ...current, [name]: value }));
-  };
+  const handleChange = (e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    if (!form.email || !form.password) {
-      toast.error("Email and password are required");
-      return;
-    }
-
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
     try {
-      setIsLoading(true);
-      await login(form);
-      toast.success("Logged in successfully");
-      navigate("/dashboard");
-    } catch (error) {
-      toast.error(getErrorMessage(error));
+      await login(form.email, form.password);
+      toast.success('Welcome back!');
+      navigate('/dashboard');
+    } catch (err) {
+      toast.error(err.message);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-10">
-      <section className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-soft">
-        <div className="mb-8 flex items-center gap-3">
-          <span className="inline-flex h-11 w-11 items-center justify-center rounded-md bg-slate-950 text-white">
-            <CheckSquare size={24} />
-          </span>
-          <div>
-            <h1 className="text-2xl font-semibold text-slate-950">Welcome back</h1>
-            <p className="text-sm text-slate-500">Manage your work from one dashboard.</p>
-          </div>
-        </div>
+    <div className="min-h-screen flex" style={{ backgroundColor: 'var(--bg)', color: 'var(--text)' }}>
+      {/* Left panel */}
+      <div
+        className="hidden lg:flex flex-1 items-center justify-center p-12 relative overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #c2410c 100%)' }}
+      >
+        <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute -bottom-20 -right-20 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
+        <motion.div
+          initial={{ opacity: 0, scale: .9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: .7 }}
+          className="relative z-10 text-center"
+        >
+          <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}>
+            <AuthIllustration className="w-72 mx-auto mb-8" />
+          </motion.div>
+          <h2 className="text-3xl font-bold text-white mb-3">Welcome back</h2>
+          <p className="text-orange-100 max-w-xs mx-auto">
+            Sign in to access your tasks and pick up right where you left off.
+          </p>
+        </motion.div>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="text-sm font-medium text-slate-700" htmlFor="email">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              className="mt-1 h-11 w-full rounded-md border border-slate-200 px-3 outline-none transition focus:border-slate-500"
-              placeholder="you@example.com"
-            />
-          </div>
+      {/* Right panel */}
+      <div className="flex-1 flex items-center justify-center p-6">
+        <motion.div variants={stagger} initial="hidden" animate="show" className="w-full max-w-md">
+          <motion.div variants={fadeUp} className="text-center mb-8">
+            <Link to="/" className="inline-flex items-center gap-2 font-bold text-2xl" style={{ color: 'var(--brand)' }}>
+              <FiCheckSquare className="h-7 w-7" />
+              TaskFlow
+            </Link>
+            <h1 className="mt-4 text-2xl font-bold" style={{ color: 'var(--text)' }}>Sign in to your account</h1>
+            <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>Enter your credentials to continue</p>
+          </motion.div>
 
-          <div>
-            <label className="text-sm font-medium text-slate-700" htmlFor="password">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              className="mt-1 h-11 w-full rounded-md border border-slate-200 px-3 outline-none transition focus:border-slate-500"
-              placeholder="Your password"
-            />
-          </div>
+          <motion.div variants={fadeUp} className="card p-8 shadow-lg">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label htmlFor="email" className="label">Email address</label>
+                <div className="relative">
+                  <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--text-muted)' }} />
+                  <input id="email" name="email" type="email" className="input pl-10"
+                    placeholder="you@example.com" value={form.email} onChange={handleChange}
+                    required autoComplete="email" />
+                </div>
+              </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="h-11 w-full rounded-md bg-slate-950 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isLoading ? "Logging in..." : "Login"}
-          </button>
-        </form>
+              <div>
+                <label htmlFor="password" className="label">Password</label>
+                <div className="relative">
+                  <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--text-muted)' }} />
+                  <input id="password" name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    className="input pl-10 pr-10"
+                    placeholder="••••••••" value={form.password} onChange={handleChange}
+                    required autoComplete="current-password" />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                    style={{ color: 'var(--text-muted)' }}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}>
+                    {showPassword ? <FiEyeOff className="h-4 w-4" /> : <FiEye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
 
-        <p className="mt-6 text-center text-sm text-slate-600">
-          No account?{" "}
-          <Link className="font-semibold text-slate-950 hover:underline" to="/register">
-            Register
-          </Link>
-        </p>
-      </section>
-    </main>
+              <motion.button type="submit" className="btn-primary w-full py-2.5 rounded-xl text-base"
+                disabled={loading} whileTap={{ scale: .97 }}>
+                {loading ? <Loader size="sm" /> : <><span>Sign In</span><FiArrowRight className="h-4 w-4" /></>}
+              </motion.button>
+            </form>
+
+            <p className="text-center text-sm mt-6" style={{ color: 'var(--text-muted)' }}>
+              Don't have an account?{' '}
+              <Link to="/register" className="font-semibold hover:underline" style={{ color: 'var(--brand)' }}>
+                Sign up free
+              </Link>
+            </p>
+          </motion.div>
+        </motion.div>
+      </div>
+    </div>
   );
-};
-
-export default Login;
+}

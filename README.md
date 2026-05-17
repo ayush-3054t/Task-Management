@@ -1,103 +1,76 @@
-# MERN Task Management App
+# TaskFlow — MERN Task Management App
 
-Full-stack task management app with JWT authentication, user-specific CRUD, filters, search, counters, responsive Tailwind UI, toast notifications, loading states, and Socket.io task update events.
+A full-stack task management application built with MongoDB, Express, React, and Node.js.
+
+## Features
+
+- **Authentication** — JWT-based register/login with bcrypt password hashing
+- **Task CRUD** — Create, read, update, delete tasks
+- **Filters & Search** — Filter by status, priority; full-text search; sort options
+- **Real-time Updates** — Socket.IO syncs changes instantly across sessions
+- **Priority & Status** — High/Medium/Low priority, To Do / In Progress / Completed statuses
+- **Due Dates & Tags** — Attach deadlines and custom tags to tasks
+- **Responsive UI** — Tailwind CSS, works on mobile and desktop
+
+## Tech Stack
+
+| Layer    | Tech                              |
+|----------|-----------------------------------|
+| Frontend | React 18, Vite, Tailwind CSS      |
+| Backend  | Node.js, Express 4                |
+| Database | MongoDB Atlas + Mongoose          |
+| Auth     | JWT + bcryptjs                    |
+| Realtime | Socket.IO                         |
 
 ## Project Structure
 
-```txt
-backend/
-  src/config
-  src/controllers
-  src/middleware
-  src/models
-  src/routes
-frontend/
-  src/components
-  src/context
-  src/pages
-  src/services
+```
+├── backend/
+│   └── src/
+│       ├── config/db.js
+│       ├── controllers/
+│       ├── middleware/
+│       ├── models/
+│       ├── routes/
+│       ├── app.js
+│       └── server.js
+└── frontend/
+    └── src/
+        ├── components/
+        ├── context/
+        ├── pages/
+        ├── services/
+        └── styles/
 ```
 
-## Backend Setup
+## Getting Started
 
+### Backend
 ```bash
 cd backend
 npm install
+npm run dev        # starts on port 5000
 ```
 
-Fill `backend/.env`:
-
-```env
-MONGO_URI=mongodb://127.0.0.1:27017/task-management
-JWT_SECRET=replace_with_a_local_secret
-PORT=5001
-CLIENT_URL=http://localhost:5173
-```
-
-If `JWT_SECRET` contains characters like `#`, wrap it in quotes so dotenv reads the full value.
-
-Run:
-
-```bash
-npm run dev
-```
-
-API endpoints:
-
-```txt
-POST   /api/auth/register
-POST   /api/auth/login
-GET    /api/tasks
-POST   /api/tasks
-PUT    /api/tasks/:id
-DELETE /api/tasks/:id
-```
-
-## Frontend Setup
-
+### Frontend
 ```bash
 cd frontend
 npm install
-npm run dev
+npm run dev        # starts on port 5173
 ```
 
-The React app runs at `http://localhost:5173` and expects the backend at `http://localhost:5001`.
+## Environment Variables
 
-Frontend routes:
-
-```txt
-/           Public landing page
-/login      Login page
-/register   Register page
-/dashboard  Protected task dashboard
+**backend/.env**
+```
+MONGO_URI=...
+JWT_SECRET=...
+PORT=5000
+CLIENT_URL=http://localhost:5173
 ```
 
-## Sample MongoDB Schema
-
-User:
-
-```js
-{
-  name: String,
-  email: String,
-  password: String,
-  createdAt: Date,
-  updatedAt: Date
-}
+**frontend/.env**
 ```
-
-Task:
-
-```js
-{
-  user: ObjectId,
-  title: String,
-  description: String,
-  status: "pending" | "in-progress" | "completed",
-  dueDate: Date,
-  createdAt: Date,
-  updatedAt: Date
-}
+VITE_API_URL=http://localhost:5000/api
+VITE_SOCKET_URL=http://localhost:5000
 ```
-
-JWTs are issued without expiration logic, as requested.

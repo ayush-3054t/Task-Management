@@ -1,37 +1,137 @@
-import { LogOut, Plus } from "lucide-react";
-import { useAuth } from "../context/AuthContext.jsx";
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiCheckSquare, FiLogOut, FiUser, FiMenu, FiX } from 'react-icons/fi';
+import { useAuth } from '../context/AuthContext';
+import ThemeToggle from './ThemeToggle';
+import toast from 'react-hot-toast';
 
-const Navbar = ({ onCreate }) => {
+export default function Navbar() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    toast.success('Logged out successfully');
+    navigate('/');
+  };
 
   return (
-    <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-950">Task Management</h1>
-          <p className="text-sm text-slate-500">Signed in as {user?.name}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={onCreate}
-            className="inline-flex h-10 items-center gap-2 rounded-md bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
-          >
-            <Plus size={18} />
-            <span className="hidden sm:inline">New Task</span>
-          </button>
-          <button
-            type="button"
-            onClick={logout}
-            className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-            aria-label="Logout"
-          >
-            <LogOut size={18} />
-          </button>
-        </div>
-      </div>
-    </header>
-  );
-};
+    <nav
+      className="sticky top-0 z-40 backdrop-blur-md border-b"
+      style={{
+        backgroundColor: 'color-mix(in srgb, var(--bg-card) 85%, transparent)',
+        borderColor: 'var(--border)',
+      }}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
 
-export default Navbar;
+          {/* Logo */}
+          <Link to={user ? '/dashboard' : '/'}>
+            <motion.div
+              className="flex items-center gap-2 font-bold text-xl"
+              style={{ color: 'var(--brand)' }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: .97 }}
+            >
+              <FiCheckSquare className="h-6 w-6" />
+              <span>TaskFlow</span>
+            </motion.div>
+          </Link>
+
+          {/* Desktop nav */}
+          <div className="hidden sm:flex items-center gap-3">
+            <ThemeToggle />
+
+            {user ? (
+              <>
+                <div
+                  className="flex items-center gap-2 text-sm px-3 py-1.5 rounded-full border"
+                  style={{ backgroundColor: 'var(--bg-muted)', borderColor: 'var(--border)', color: 'var(--text-muted)' }}
+                >
+                  <div
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                    style={{ backgroundColor: 'var(--brand)' }}
+                  >
+                    {user.name[0].toUpperCase()}
+                  </div>
+                  {user.name}
+                </div>
+                <motion.button
+                  onClick={handleLogout}
+                  className="btn-secondary text-sm"
+                  whileTap={{ scale: .95 }}
+                >
+                  <FiLogOut className="h-4 w-4" />
+                  Logout
+                </motion.button>
+              </>
+            ) : (
+              <>
+                <Link to="/login">
+                  <motion.span className="btn-ghost text-sm" whileTap={{ scale: .95 }}>
+                    Login
+                  </motion.span>
+                </Link>
+                <Link to="/register">
+                  <motion.span
+                    className="btn-primary text-sm rounded-xl"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: .97 }}
+                  >
+                    Get Started
+                  </motion.span>
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Mobile: toggle + hamburger */}
+          <div className="sm:hidden flex items-center gap-2">
+            <ThemeToggle />
+            <motion.button
+              className="p-2 rounded-lg"
+              style={{ color: 'var(--text-muted)' }}
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="Toggle menu"
+              whileTap={{ scale: .9 }}
+            >
+              {menuOpen ? <FiX className="h-5 w-5" /> : <FiMenu className="h-5 w-5" />}
+            </motion.button>
+          </div>
+        </div>
+
+        {/* Mobile menu */}
+        <AnimatePresence>
+          {menuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: .2 }}
+              className="sm:hidden overflow-hidden pb-4 space-y-2"
+            >
+              {user ? (
+                <>
+                  <p className="text-sm px-2 py-1 flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
+                    <FiUser className="h-4 w-4" /> {user.name}
+                  </p>
+                  <button onClick={handleLogout} className="w-full btn-secondary text-sm">
+                    <FiLogOut className="h-4 w-4" /> Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className="block btn-ghost text-sm" onClick={() => setMenuOpen(false)}>Login</Link>
+                  <Link to="/register" className="block btn-primary text-sm" onClick={() => setMenuOpen(false)}>Get Started</Link>
+                </>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </nav>
+  );
+}

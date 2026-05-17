@@ -1,170 +1,188 @@
-import { Link } from "react-router-dom";
+import { useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { motion, useInView } from 'framer-motion';
 import {
-  ArrowRight,
-  CalendarCheck,
-  CheckCircle2,
-  Clock3,
-  LayoutDashboard,
-  Search,
-  ShieldCheck
-} from "lucide-react";
-import { useAuth } from "../context/AuthContext.jsx";
+  FiCheckSquare, FiZap, FiShield, FiTrendingUp,
+  FiArrowRight, FiClock, FiUsers,
+} from 'react-icons/fi';
+import Navbar from '../components/Navbar';
+import HeroIllustration from '../components/illustrations/HeroIllustration';
 
-const previewTasks = [
-  {
-    title: "Finalize sprint scope",
-    status: "In progress",
-    meta: "Today",
-    tone: "border-blue-200 bg-blue-50 text-blue-700"
-  },
-  {
-    title: "Review launch checklist",
-    status: "Pending",
-    meta: "Tomorrow",
-    tone: "border-amber-200 bg-amber-50 text-amber-700"
-  },
-  {
-    title: "Send product notes",
-    status: "Completed",
-    meta: "Done",
-    tone: "border-emerald-200 bg-emerald-50 text-emerald-700"
-  }
+/* ── Variants ── */
+const fadeUp = {
+  hidden: { opacity: 0, y: 28 },
+  show:   { opacity: 1, y: 0, transition: { duration: .5, ease: 'easeOut' } },
+};
+const stagger = { hidden: {}, show: { transition: { staggerChildren: .11 } } };
+const scaleIn = {
+  hidden: { opacity: 0, scale: .9 },
+  show:   { opacity: 1, scale: 1, transition: { duration: .4, ease: 'easeOut' } },
+};
+
+/* ── Features data ── */
+const features = [
+  { icon: FiZap,         title: 'Real-time Sync',    desc: 'Changes appear instantly across all sessions via WebSockets.' },
+  { icon: FiCheckSquare, title: 'Smart Filters',     desc: 'Filter by status, priority, or search to find any task fast.' },
+  { icon: FiShield,      title: 'Secure Auth',       desc: 'JWT-based login keeps your data private and protected.' },
+  { icon: FiTrendingUp,  title: 'Progress Tracking', desc: 'Visual stats and progress bars show how much you have done.' },
+  { icon: FiClock,       title: 'Due Date Alerts',   desc: 'Colour-coded deadlines so you never miss an important task.' },
+  { icon: FiUsers,       title: 'Multi-device',      desc: 'Your tasks stay in sync no matter which device you use.' },
 ];
 
-const Landing = () => {
-  const { user } = useAuth();
-  const primaryPath = user ? "/dashboard" : "/register";
-
+function Section({ children, className = '' }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '-80px' });
   return (
-    <main className="min-h-screen bg-white text-slate-950">
-      <section
-        className="relative min-h-screen overflow-hidden bg-cover bg-center"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1800&q=85')"
-        }}
-      >
-        <div className="absolute inset-0 bg-slate-950/70" />
-        <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col px-4 sm:px-6">
-          <nav className="flex items-center justify-between py-5 text-white">
-            <Link to="/" className="flex items-center gap-3">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-white text-slate-950">
-                <CheckCircle2 size={22} />
-              </span>
-              <span className="text-lg font-semibold">Task Management</span>
-            </Link>
-            <div className="flex items-center gap-2">
-              {user ? (
-                <Link
-                  to="/dashboard"
-                  className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
-                >
-                  Dashboard
+    <motion.div ref={ref} variants={stagger} initial="hidden" animate={inView ? 'show' : 'hidden'} className={className}>
+      {children}
+    </motion.div>
+  );
+}
+
+export default function Landing() {
+  return (
+    <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: 'var(--bg)', color: 'var(--text)' }}>
+      <Navbar />
+
+      {/* ── HERO ── */}
+      <section className="hero-mesh relative overflow-hidden">
+        {/* Blobs */}
+        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full blur-3xl blob"
+          style={{ backgroundColor: 'rgba(251,146,60,.25)' }} />
+        <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full blur-3xl blob blob-delay-2"
+          style={{ backgroundColor: 'rgba(234,88,12,.18)' }} />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 lg:pt-24 lg:pb-28">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+
+            {/* Copy */}
+            <motion.div variants={stagger} initial="hidden" animate="show" className="text-center lg:text-left">
+              <motion.div variants={fadeUp}
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium mb-6 border"
+                style={{ backgroundColor: 'var(--brand-lt)', borderColor: 'var(--border)', color: 'var(--brand)' }}
+              >
+                <FiZap className="h-4 w-4" />
+                MERN Stack · Real-time
+              </motion.div>
+
+              <motion.h1 variants={fadeUp}
+                className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.08] mb-6"
+                style={{ color: 'var(--text)' }}
+              >
+                Manage tasks<br />
+                with <span className="gradient-text">clarity</span>
+              </motion.h1>
+
+              <motion.p variants={fadeUp}
+                className="text-xl max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                TaskFlow helps you organise work, track progress, and hit every deadline — all in one clean interface.
+              </motion.p>
+
+              <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <Link to="/register" className="btn-primary btn-glow text-base px-8 py-3 rounded-xl">
+                  Start for free <FiArrowRight className="h-5 w-5" />
                 </Link>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    className="rounded-md px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
-                  >
-                    Register
-                  </Link>
-                </>
-              )}
-            </div>
-          </nav>
-
-          <div className="grid flex-1 items-center gap-10 py-8 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="max-w-2xl text-white">
-              <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/12 px-3 py-1 text-sm font-medium ring-1 ring-white/20">
-                <ShieldCheck size={16} />
-                Secure task tracking with JWT authentication
-              </p>
-              <h1 className="text-4xl font-semibold leading-tight sm:text-6xl">
-                Task Management
-              </h1>
-              <p className="mt-5 max-w-xl text-base leading-7 text-slate-200 sm:text-lg">
-                Plan work, filter priorities, search tasks, and track completion from a responsive dashboard built for daily focus.
-              </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link
-                  to={primaryPath}
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-white px-5 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
-                >
-                  {user ? "Open Dashboard" : "Get Started"}
-                  <ArrowRight size={18} />
+                <Link to="/login" className="btn-secondary text-base px-8 py-3 rounded-xl">
+                  Sign in
                 </Link>
-                {!user && (
-                  <Link
-                    to="/login"
-                    className="inline-flex h-12 items-center justify-center rounded-md border border-white/30 px-5 text-sm font-semibold text-white transition hover:bg-white/10"
-                  >
-                    Login
-                  </Link>
-                )}
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
 
-            <div className="rounded-lg border border-white/20 bg-white/95 p-4 shadow-2xl backdrop-blur">
-              <div className="flex flex-col gap-4 border-b border-slate-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-500">Dashboard preview</p>
-                  <h2 className="text-xl font-semibold text-slate-950">Today&apos;s work</h2>
-                </div>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={17} />
-                  <div className="h-10 w-full rounded-md border border-slate-200 bg-white pl-10 pr-16 text-sm leading-10 text-slate-400 sm:w-56">
-                    Search
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid gap-3 py-4 sm:grid-cols-3">
-                <div className="rounded-lg border border-slate-200 bg-white p-4">
-                  <LayoutDashboard className="text-slate-500" size={19} />
-                  <p className="mt-3 text-2xl font-semibold">12</p>
-                  <p className="text-sm text-slate-500">Total</p>
-                </div>
-                <div className="rounded-lg border border-slate-200 bg-white p-4">
-                  <CalendarCheck className="text-emerald-600" size={19} />
-                  <p className="mt-3 text-2xl font-semibold">7</p>
-                  <p className="text-sm text-slate-500">Completed</p>
-                </div>
-                <div className="rounded-lg border border-slate-200 bg-white p-4">
-                  <Clock3 className="text-amber-600" size={19} />
-                  <p className="mt-3 text-2xl font-semibold">3</p>
-                  <p className="text-sm text-slate-500">Pending</p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {previewTasks.map((task) => (
-                  <div
-                    key={task.title}
-                    className="flex items-center justify-between gap-4 rounded-lg border border-slate-200 bg-white p-4"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate font-semibold text-slate-950">{task.title}</p>
-                      <p className="text-sm text-slate-500">{task.meta}</p>
-                    </div>
-                    <span className={`shrink-0 rounded-full border px-3 py-1 text-xs font-semibold ${task.tone}`}>
-                      {task.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Illustration */}
+            <motion.div
+              initial={{ opacity: 0, x: 60 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: .7, ease: 'easeOut', delay: .2 }}
+              className="hidden lg:block"
+            >
+              <motion.div
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                <HeroIllustration className="w-full max-w-lg mx-auto drop-shadow-2xl" />
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </section>
-    </main>
-  );
-};
 
-export default Landing;
+      {/* ── FEATURES ── */}
+      <section className="py-20" style={{ backgroundColor: 'var(--bg-muted)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Section>
+            <motion.div variants={fadeUp} className="text-center mb-12">
+              <p className="text-sm font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--brand)' }}>
+                Features
+              </p>
+              <h2 className="text-4xl font-bold" style={{ color: 'var(--text)' }}>
+                Everything you need to stay productive
+              </h2>
+            </motion.div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {features.map((f) => (
+                <motion.div
+                  key={f.title}
+                  variants={scaleIn}
+                  whileHover={{ y: -4, boxShadow: '0 16px 32px -8px rgba(0,0,0,.14)' }}
+                  className="card p-6 cursor-default"
+                >
+                  <div
+                    className="w-11 h-11 rounded-2xl flex items-center justify-center mb-4"
+                    style={{ backgroundColor: 'var(--brand-lt)', color: 'var(--brand)' }}
+                  >
+                    <f.icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-semibold mb-1.5" style={{ color: 'var(--text)' }}>{f.title}</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>{f.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+          </Section>
+        </div>
+      </section>
+
+      {/* ── CTA ── */}
+      <section className="py-20 relative overflow-hidden">
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #c2410c 100%)' }}
+        />
+        <div className="absolute -top-16 -right-16 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute -bottom-16 -left-16 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
+
+        <Section className="relative max-w-2xl mx-auto px-4 text-center">
+          <motion.div variants={fadeUp}>
+            <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-5">
+              Ready to get organised?
+            </h2>
+            <p className="text-orange-100 text-lg mb-8">
+              Create your free account and start managing tasks today.
+            </p>
+            <Link
+              to="/register"
+              className="inline-flex items-center gap-2 bg-white font-bold px-10 py-4 rounded-2xl text-base hover:bg-orange-50 transition-colors shadow-xl"
+              style={{ color: 'var(--brand)' }}
+            >
+              Get started free <FiArrowRight className="h-5 w-5" />
+            </Link>
+          </motion.div>
+        </Section>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer className="py-6 border-t" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm" style={{ color: 'var(--text-muted)' }}>
+          <div className="flex items-center gap-2 font-semibold" style={{ color: 'var(--text)' }}>
+            <FiCheckSquare className="h-4 w-4" style={{ color: 'var(--brand)' }} />
+            TaskFlow
+          </div>
+          <span>MongoDB · Express · React · Node.js</span>
+          <span>© {new Date().getFullYear()} TaskFlow</span>
+        </div>
+      </footer>
+    </div>
+  );
+}

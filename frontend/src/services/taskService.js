@@ -1,21 +1,38 @@
-import api from "./api.js";
+import api from './api';
 
-export const fetchTasks = async (params = {}) => {
-  const { data } = await api.get("/tasks", { params });
-  return data;
-};
+export const taskService = {
+  getTasks: async (filters = {}) => {
+    const params = new URLSearchParams();
+    if (filters.status) params.append('status', filters.status);
+    if (filters.priority) params.append('priority', filters.priority);
+    if (filters.search) params.append('search', filters.search);
+    if (filters.sort) params.append('sort', filters.sort);
+    const { data } = await api.get(`/tasks?${params.toString()}`);
+    return data;
+  },
 
-export const createTask = async (payload) => {
-  const { data } = await api.post("/tasks", payload);
-  return data;
-};
+  getTask: async (id) => {
+    const { data } = await api.get(`/tasks/${id}`);
+    return data;
+  },
 
-export const updateTask = async (id, payload) => {
-  const { data } = await api.put(`/tasks/${id}`, payload);
-  return data;
-};
+  createTask: async (taskData) => {
+    const { data } = await api.post('/tasks', taskData);
+    return data;
+  },
 
-export const deleteTask = async (id) => {
-  const { data } = await api.delete(`/tasks/${id}`);
-  return data;
+  updateTask: async (id, taskData) => {
+    const { data } = await api.put(`/tasks/${id}`, taskData);
+    return data;
+  },
+
+  updateStatus: async (id, status) => {
+    const { data } = await api.patch(`/tasks/${id}/status`, { status });
+    return data;
+  },
+
+  deleteTask: async (id) => {
+    const { data } = await api.delete(`/tasks/${id}`);
+    return data;
+  },
 };

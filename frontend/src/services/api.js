@@ -1,36 +1,27 @@
-import axios from "axios";
+import axios from 'axios';
+
+const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://task-management-0oav.onrender.com/api"
+  baseURL: BASE_URL,
+  headers: { 'Content-Type': 'application/json' },
 });
 
-api.interceptors.request.use(
-  (config) => {
-    const storedUser = localStorage.getItem("taskManagerUser");
-    const user = storedUser ? JSON.parse(storedUser) : null;
+// Attach token to every request
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
 
-    if (user?.token) {
-      config.headers.Authorization = `Bearer ${user.token}`;
-    }
-
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
+// Normalize error messages
 api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    console.error("API Error:", error.response || error.message);
-    return Promise.reject(error);
+  (res) => res,
+  (err) => {
+    const message =
+      err.response?.data?.message || err.message || 'Something went wrong';
+    return Promise.reject(new Error(message));
   }
 );
-
-export const getErrorMessage = (error) => {
-  if (error.code === "ERR_NETWORK") {
-    return "Unable to connect to the server. Please check if the backend is running.";
-  }
-  return error.response?.data?.message || error.message || "Something went wrong";
-};
 
 export default api;

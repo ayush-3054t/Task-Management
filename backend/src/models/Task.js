@@ -1,37 +1,48 @@
-import mongoose from "mongoose";
+const mongoose = require('mongoose');
 
 const taskSchema = new mongoose.Schema(
   {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true
-    },
     title: {
       type: String,
-      required: [true, "Title is required"],
+      required: [true, 'Title is required'],
       trim: true,
-      maxlength: 120
+      maxlength: [100, 'Title cannot exceed 100 characters'],
     },
     description: {
       type: String,
       trim: true,
-      maxlength: 1000,
-      default: ""
+      maxlength: [500, 'Description cannot exceed 500 characters'],
+      default: '',
     },
     status: {
       type: String,
-      enum: ["pending", "in-progress", "completed"],
-      default: "pending"
+      enum: ['todo', 'in-progress', 'completed'],
+      default: 'todo',
+    },
+    priority: {
+      type: String,
+      enum: ['low', 'medium', 'high'],
+      default: 'medium',
     },
     dueDate: {
       type: Date,
-      required: [true, "Due date is required"]
-    }
+      default: null,
+    },
+    tags: {
+      type: [String],
+      default: [],
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
-const Task = mongoose.model("Task", taskSchema);
+// Index for faster queries
+taskSchema.index({ user: 1, status: 1 });
+taskSchema.index({ user: 1, priority: 1 });
 
-export default Task;
+module.exports = mongoose.model('Task', taskSchema);

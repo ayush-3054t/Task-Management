@@ -1,11 +1,23 @@
-import api from "./api.js";
+import api from './api';
 
-export const registerRequest = async (payload) => {
-  const { data } = await api.post("/auth/register", payload);
-  return data;
-};
+export const authService = {
+  register: async (name, email, password) => {
+    const { data } = await api.post('/auth/register', { name, email, password });
+    return data;
+  },
 
-export const loginRequest = async (payload) => {
-  const { data } = await api.post("/auth/login", payload);
-  return data;
+  login: async (email, password) => {
+    const { data } = await api.post('/auth/login', { email, password });
+    return data;
+  },
+
+  getMe: async () => {
+    const { data } = await api.get('/auth/me');
+    return data;
+  },
+
+  updateProfile: async (updates) => {
+    const { data } = await api.put('/auth/profile', updates);
+    return data;
+  },
 };

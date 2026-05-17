@@ -1,81 +1,143 @@
-import { CalendarDays, CheckCircle2, Pencil, Trash2 } from "lucide-react";
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiEdit2, FiTrash2, FiCalendar, FiTag, FiMoreVertical, FiArrowRight } from 'react-icons/fi';
+import { format, isPast, isToday } from 'date-fns';
 
-const statusStyles = {
-  pending: "bg-amber-50 text-amber-700 ring-amber-200",
-  "in-progress": "bg-blue-50 text-blue-700 ring-blue-200",
-  completed: "bg-emerald-50 text-emerald-700 ring-emerald-200"
+const STATUS_STYLES = {
+  todo:          { bg: 'rgba(234,88,12,.1)',  color: 'var(--brand)' },
+  'in-progress': { bg: 'rgba(59,130,246,.1)', color: '#3b82f6' },
+  completed:     { bg: 'rgba(16,185,129,.1)', color: '#10b981' },
 };
+const STATUS_LABELS = { todo: 'To Do', 'in-progress': 'In Progress', completed: 'Completed' };
 
-const statusLabels = {
-  pending: "Pending",
-  "in-progress": "In progress",
-  completed: "Completed"
-};
+const PRIORITY_DOT   = { low: '#10b981', medium: '#f59e0b', high: '#ef4444' };
+const PRIORITY_LABEL = { low: '🟢 Low', medium: '🟡 Medium', high: '🔴 High' };
+const PRIORITY_BG    = { low: 'rgba(16,185,129,.1)', medium: 'rgba(245,158,11,.1)', high: 'rgba(239,68,68,.1)' };
+const PRIORITY_COLOR = { low: '#10b981', medium: '#f59e0b', high: '#ef4444' };
 
-const formatDate = (date) => {
-  return new Intl.DateTimeFormat("en", {
-    month: "short",
-    day: "numeric",
-    year: "numeric"
-  }).format(new Date(date));
-};
+const nextStatus = { todo: 'in-progress', 'in-progress': 'completed', completed: 'todo' };
 
-const TaskCard = ({ task, onEdit, onDelete, onStatusChange }) => {
+export default function TaskCard({ task, onEdit, onDelete, onStatusChange }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const dueDateColor = () => {
+    if (!task.dueDate) return 'var(--text-muted)';
+    const d = new Date(task.dueDate);
+    if (task.status === 'completed') return 'var(--text-muted)';
+    if (isPast(d) && !isToday(d)) return '#ef4444';
+    if (isToday(d)) return '#f59e0b';
+    return 'var(--text-muted)';
+  };
+
   return (
-    <article className="rounded-lg border border-slate-200 bg-white p-5 shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h3 className="break-words text-lg font-semibold text-slate-950">{task.title}</h3>
-          <p className="mt-2 line-clamp-3 break-words text-sm leading-6 text-slate-600">
-            {task.description || "No description provided."}
-          </p>
+    <motion.div
+      layout
+      whileHover={{ y: -3, boxShadow: '0 12px 28px -6px rgba(0,0,0,.15)' }}
+      transition={{ duration: .2 }}
+      className={`card p-4 ${task.status === 'completed' ? 'opacity-70' : ''}`}
+    >
+      {/* Top accent bar */}
+      <div className="h-0.5 w-full rounded-full mb-3"
+        style={{ backgroundColor: PRIORITY_DOT[task.priority] }} />
+
+      {/* Header */}
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="flex items-start gap-2 flex-1 min-w-0">
+          <div className="relative mt-1.5 flex-shrink-0">
+            <span className="block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: PRIORITY_DOT[task.priority] }} />
+            {task.priority === 'high' && task.status !== 'completed' && (
+              <span className="absolute inset-0 rounded-full ping-slow" style={{ backgroundColor: PRIORITY_DOT.high, opacity: .5 }} />
+            )}
+          </div>
+          <h3 className={`font-semibold text-sm leading-snug ${task.status === 'completed' ? 'line-through' : ''}`}
+            style={{ color: task.status === 'completed' ? 'var(--text-muted)' : 'var(--text)' }}>
+            {task.title}
+          </h3>
         </div>
-        {task.status === "completed" && (
-          <CheckCircle2 className="shrink-0 text-emerald-600" size={22} />
-        )}
+
+        {/* Menu */}
+        <div className="relative flex-shrink-0">
+          <motion.button onClick={() => setMenuOpen(!menuOpen)}
+            className="p-1 rounded-md" style={{ color: 'var(--text-muted)' }}
+            aria-label="Task options" whileTap={{ scale: .9 }}>
+            <FiMoreVertical className="h-4 w-4" />
+          </motion.button>
+
+          <AnimatePresence>
+            {menuOpen && (
+              <motion.div
+                initial={{ opacity: 0, scale: .9, y: -4 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: .9, y: -4 }}
+                transition={{ duration: .15 }}
+                className="absolute right-0 top-7 rounded-xl shadow-xl z-10 min-w-[130px] overflow-hidden border"
+                style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}
+                onMouseLeave={() => setMenuOpen(false)}
+              >
+                <button onClick={() => { onEdit(task); setMenuOpen(false); }}
+                  className="flex items-center gap-2 w-full px-3 py-2.5 text-sm transition-colors"
+                  style={{ color: 'var(--text)' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-muted)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                  <FiEdit2 className="h-3.5 w-3.5" style={{ color: 'var(--brand)' }} /> Edit
+                </button>
+                <button onClick={() => { onDelete(task._id); setMenuOpen(false); }}
+                  className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-red-500 transition-colors"
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(239,68,68,.08)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                  <FiTrash2 className="h-3.5 w-3.5" /> Delete
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
-      <div className="mt-5 flex flex-wrap items-center gap-2">
-        <span className={`rounded-full px-3 py-1 text-xs font-semibold ring-1 ${statusStyles[task.status]}`}>
-          {statusLabels[task.status]}
-        </span>
-        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-          <CalendarDays size={14} />
-          {formatDate(task.dueDate)}
-        </span>
-      </div>
+      {/* Description */}
+      {task.description && (
+        <p className="text-xs mb-3 line-clamp-2 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+          {task.description}
+        </p>
+      )}
 
-      <div className="mt-5 flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
-        <select
-          value={task.status}
-          onChange={(event) => onStatusChange(task, event.target.value)}
-          className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-slate-500"
-        >
-          <option value="pending">Pending</option>
-          <option value="in-progress">In progress</option>
-          <option value="completed">Completed</option>
-        </select>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => onEdit(task)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 text-slate-600 transition hover:bg-slate-50"
-            aria-label="Edit task"
-          >
-            <Pencil size={17} />
-          </button>
-          <button
-            type="button"
-            onClick={() => onDelete(task._id)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-rose-200 text-rose-600 transition hover:bg-rose-50"
-            aria-label="Delete task"
-          >
-            <Trash2 size={17} />
-          </button>
+      {/* Tags */}
+      {task.tags?.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-3">
+          {task.tags.map((tag) => (
+            <span key={tag}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
+              style={{ backgroundColor: 'var(--brand-lt)', color: 'var(--brand)' }}>
+              <FiTag className="h-2.5 w-2.5" />{tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Footer */}
+      <div className="flex items-center justify-between gap-2 pt-2.5 border-t"
+        style={{ borderColor: 'var(--border)' }}>
+        <div className="flex items-center gap-1 text-xs" style={{ color: dueDateColor() }}>
+          {task.dueDate && (
+            <><FiCalendar className="h-3 w-3" /><span>{format(new Date(task.dueDate), 'MMM d, yyyy')}</span></>
+          )}
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <span className="badge text-xs"
+            style={{ backgroundColor: PRIORITY_BG[task.priority], color: PRIORITY_COLOR[task.priority] }}>
+            {PRIORITY_LABEL[task.priority]}
+          </span>
+          <motion.button
+            onClick={() => onStatusChange(task._id, nextStatus[task.status])}
+            className="badge cursor-pointer flex items-center gap-1 text-xs"
+            style={{ backgroundColor: STATUS_STYLES[task.status].bg, color: STATUS_STYLES[task.status].color }}
+            title="Click to advance status"
+            whileHover={{ scale: 1.05 }} whileTap={{ scale: .95 }}>
+            {STATUS_LABELS[task.status]}
+            <FiArrowRight className="h-2.5 w-2.5" />
+          </motion.button>
         </div>
       </div>
-    </article>
+    </motion.div>
   );
-};
-
-export default TaskCard;
+}

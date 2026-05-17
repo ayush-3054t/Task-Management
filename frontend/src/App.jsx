@@ -1,11 +1,17 @@
-import { Navigate, Route, Routes } from "react-router-dom";
-import ProtectedRoute from "./components/ProtectedRoute.jsx";
-import Dashboard from "./pages/Dashboard.jsx";
-import Landing from "./pages/Landing.jsx";
-import Login from "./pages/Login.jsx";
-import Register from "./pages/Register.jsx";
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+import Landing from './pages/Landing';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import ProtectedRoute from './components/ProtectedRoute';
+import Loader from './components/Loader';
 
-const App = () => {
+export default function App() {
+  const { loading } = useAuth();
+
+  if (loading) return <Loader fullScreen />;
+
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
@@ -22,6 +28,4 @@ const App = () => {
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
-};
-
-export default App;
+}
